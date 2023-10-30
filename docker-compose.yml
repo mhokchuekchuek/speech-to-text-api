@@ -1,0 +1,41 @@
+version: '3.8'
+services:
+  elasticsearch:
+    container_name: es-container
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.10.2
+    ports:
+      - 9200:9200
+      - 9300:9300
+    networks:
+      - app-network
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - ES_JAVA_OPTS=-Xms2g -Xmx2g
+      - transport.host=0.0.0.0
+      - http.cors.enabled=true
+      - http.cors.allow-origin=http://localhost
+    volumes:
+      - esdata:/usr/share/elasticsearch/data
+    restart: on-failure
+
+  fastapi:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - 8000:8000
+    volumes:
+      - ${PWD}:/app
+    command: ["./wait-for-it.sh", "es-container:9200", "--", "uvicorn", "app:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+    depends_on:
+      - elasticsearch
+    networks:
+      - app-network
+
+volumes:
+  esdata:
+
+networks:
+  app-network:
+    driver: bridge
