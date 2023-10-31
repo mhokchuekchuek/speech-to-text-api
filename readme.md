@@ -39,8 +39,10 @@ docker compose up --force-recreate --build
 http://localhost:8000/generate
 
 - variable\
-  `audio_file [flac, mp3, wav]`: upload speech audio file to find similar sentence 
+  `audio_file [flac, mp3, wav]`: upload speech audio file to find similar sentence
 
+- return value: List[Dict[text:str, score:float]]
+  
 - how to call 
     
     via curl
